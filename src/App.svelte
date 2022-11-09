@@ -56,29 +56,34 @@
 
 	let cashDesksInfo = []
 
-	const startEmulation = (randomTimePeriod, randomNumberOfPeople) => {
-		let minCashDeskIndex
+	const startEmulation = (randomTimePeriod) => {
 		
 		
 
 		setInterval(() => {
 			if (!isPaused) {
+				let randomNumberOfPeople = getRandomIntFromInterval(1, numberOfPeople) // вместо 1 поставить 0
 				for (let index = 0; index < randomNumberOfPeople; index++) {
-					minCashDeskIndex = getMinValueInArray(cashDesksInfo)
+					let minCashDeskIndex = getMinValueInArray(cashDesksInfo)
 					cashDesksInfo[minCashDeskIndex].numberOfPeopleAtOneCashDesk++
 				}
 			}
 		}, randomTimePeriod*1000);
 		
-		
+
 		
 		for (let index = 0; index < cashDesksInfo.length; index++) {
+				let timePeriodForCashDesk = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
+				cashDesksInfo[index].time = timePeriodForCashDesk 
+				
 				setInterval(() => {
+					console.log(cashDesksInfo[index].time)
 					if (!isPaused) {
 						cashDesksInfo[index].numberOfPeopleAtOneCashDesk--
 						if (cashDesksInfo[index].numberOfPeopleAtOneCashDesk < 0) {
 							cashDesksInfo[index].numberOfPeopleAtOneCashDesk = 0
 						}
+						cashDesksInfo[index].time = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
 					}
 				}, cashDesksInfo[index].time*1000)
 			}
@@ -92,15 +97,13 @@
 
 	const initEmulation = () => {
 		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod)
-		let randomNumberOfPeople = getRandomIntFromInterval(0, numberOfPeople)
+		
 
 		cashDesksInfo = []
 
-		for (let index = 1; index <= numberOfCashDesk; index++) {
-			
-			let timePeriodForCashDesk = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
+		for (let index = 0; index < numberOfCashDesk; index++) {
 			cashDesksInfo.push({
-				time: timePeriodForCashDesk,
+				time: 0,
 				numberOfPeopleAtOneCashDesk: 0
 			})
 			
@@ -109,7 +112,7 @@
 		console.log(cashDesksInfo)
 
 
-		startEmulation(randomTimePeriod, randomNumberOfPeople)
+		startEmulation(randomTimePeriod)
 		
 
 		
@@ -164,7 +167,7 @@
 		display: inline-block;
 		width: 50px;
 		height: 200px;
-		background: green;
+		background: black;
 		margin-top: 50px;
 		margin-left: 10px;
 		color: white;

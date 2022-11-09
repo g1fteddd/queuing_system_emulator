@@ -20,13 +20,13 @@
 		numberOfPeople = 0
 	}
 
-	let minTimePeriodForCashDesk = 3;
+	let minTimePeriodForCashDesk = 5;
 
 	$: if (minTimePeriodForCashDesk < 1) {
 		minTimePeriodForCashDesk = 1
 	}
 
-	let maxTimePeriodForCashDesk = 10;
+	let maxTimePeriodForCashDesk = 5;
 
 	$: if (maxTimePeriodForCashDesk < 1) {
 		maxTimePeriodForCashDesk = 1
@@ -34,10 +34,63 @@
 
 	const getRandomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
+	const getMinValueInArray = (array) => {
+		let min = array[0].numberOfPeopleAtOneCashDesk
+		let position = 0
+		
+		for (let index = 1; index < array.length; index++) {
+			if (array[index].numberOfPeopleAtOneCashDesk < min) {
+				min = array[index].numberOfPeopleAtOneCashDesk
+				position = index
+			}
+		}
+
+		return position
+	}
+
+	let isPaused = false
+
+	const pause = () => {
+		isPaused = !isPaused
+	}
 
 	let cashDesksInfo = []
 
-	const startEmulation = () => {
+	const startEmulation = (randomTimePeriod, randomNumberOfPeople) => {
+		let minCashDeskIndex
+		
+		
+
+		setInterval(() => {
+			if (!isPaused) {
+				for (let index = 0; index < randomNumberOfPeople; index++) {
+					minCashDeskIndex = getMinValueInArray(cashDesksInfo)
+					cashDesksInfo[minCashDeskIndex].numberOfPeopleAtOneCashDesk++
+				}
+			}
+		}, randomTimePeriod*1000);
+		
+		
+		
+		for (let index = 0; index < cashDesksInfo.length; index++) {
+				setInterval(() => {
+					if (!isPaused) {
+						cashDesksInfo[index].numberOfPeopleAtOneCashDesk--
+						if (cashDesksInfo[index].numberOfPeopleAtOneCashDesk < 0) {
+							cashDesksInfo[index].numberOfPeopleAtOneCashDesk = 0
+						}
+					}
+				}, cashDesksInfo[index].time*1000)
+			}
+
+
+		
+	}
+
+
+	
+
+	const initEmulation = () => {
 		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod)
 		let randomNumberOfPeople = getRandomIntFromInterval(0, numberOfPeople)
 
@@ -54,12 +107,16 @@
 		}
 
 		console.log(cashDesksInfo)
+
+
+		startEmulation(randomTimePeriod, randomNumberOfPeople)
+		
+
+		
 	}
 
 
-	afterUpdate(() => {
-		startEmulation()
-	})
+	
 
 
 </script>
@@ -81,10 +138,16 @@
 		<label for="input-maxTimePeriodForCashDesk">Максимальное время обслуживания кассы:</label>
 		<input bind:value={maxTimePeriodForCashDesk} id="input-maxTimePeriodForCashDesk" type="number" />
 
+		<button on:click={initEmulation}>Запустить процесс</button>
+		<button on:click={pause}>Пауза</button>
+
 		
 		<div class="cashDesks">
 			{#each cashDesksInfo as cashDesk}
-				<div class="cashDesk">{cashDesk.time}</div>
+				<div class="cashDesk">
+					<p>{cashDesk.time}</p>
+					<p>{cashDesk.numberOfPeopleAtOneCashDesk}</p>
+				</div>
 			{/each}
 		</div>
 		
@@ -93,6 +156,10 @@
 </main>
 
 <style>
+	input {
+		display: block;
+	}
+
 	.cashDesk{
 		display: inline-block;
 		width: 50px;

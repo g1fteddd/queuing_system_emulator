@@ -2,6 +2,8 @@
 	import { afterUpdate } from "svelte";
     import { check_outros } from "svelte/internal";
 
+	
+
 	let numberOfCashDesk = 1;
 
 	$: if (numberOfCashDesk < 1) {
@@ -20,17 +22,17 @@
 		numberOfPeople = 0;
 	}
 
-	let minTimePeriodForCashDesk = 5;
+	let minTimePeriodForCashDesk = [5];
 
-	$: if (minTimePeriodForCashDesk < 1) {
-		minTimePeriodForCashDesk = 1;
-	}
+	// $: if (minTimePeriodForCashDesk < 1) {
+	// 	minTimePeriodForCashDesk = 1;
+	// }
 
-	let maxTimePeriodForCashDesk = 5;
+	let maxTimePeriodForCashDesk = [5];
 
-	$: if (maxTimePeriodForCashDesk < 1) {
-		maxTimePeriodForCashDesk = 1;
-	}
+	// $: if (maxTimePeriodForCashDesk < 1) {
+	// 	maxTimePeriodForCashDesk = 1;
+	// }
 
 	const getRandomIntFromInterval = (min, max) =>
 		Math.floor(Math.random() * (max - min + 1) + min);
@@ -42,6 +44,20 @@
 		for (let index = 1; index < array.length; index++) {
 			if (array[index].numberOfPeopleAtOneCashDesk < min) {
 				min = array[index].numberOfPeopleAtOneCashDesk;
+				position = index;
+			}
+		}
+
+		return position;
+	};
+
+	const getMaxValueInArray = (array) => {
+		let max = array[0].numberOfPeopleAtOneCashDesk;
+		let position = 0;
+
+		for (let index = 1; index < array.length; index++) {
+			if (array[index].numberOfPeopleAtOneCashDesk > max) {
+				max = array[index].numberOfPeopleAtOneCashDesk;
 				position = index;
 			}
 		}
@@ -106,8 +122,12 @@
 	const clickMinusNumberOfCashDesk = () => {
 		stopIntervals();
 		cashDesksInfo.pop()
+		minTimePeriodForCashDesk.pop()
+		maxTimePeriodForCashDesk.pop()
 
 		cashDesksInfo = cashDesksInfo;
+		minTimePeriodForCashDesk = minTimePeriodForCashDesk
+		maxTimePeriodForCashDesk = maxTimePeriodForCashDesk
 		
 
 		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
@@ -118,9 +138,11 @@
 	const clickPlusNumberOfCashDesk = () => {
 
 		stopIntervals();
+		minTimePeriodForCashDesk = [...minTimePeriodForCashDesk, 5]
+		maxTimePeriodForCashDesk = [...maxTimePeriodForCashDesk, 5]
 		let timePeriodForCashDesk = getRandomIntFromInterval(
-			minTimePeriodForCashDesk,
-			maxTimePeriodForCashDesk
+			minTimePeriodForCashDesk[minTimePeriodForCashDesk.length - 1],
+			maxTimePeriodForCashDesk[maxTimePeriodForCashDesk.length - 1]
 		);
 		cashDesksInfo.push({
 			time: timePeriodForCashDesk,
@@ -178,16 +200,41 @@
 
 	const clickPlusMinTimePeriodForCashDesk = (index) => {
 		stopIntervals();
-		let timePeriodForCashDesk = getRandomIntFromInterval(
-			minTimePeriodForCashDesk,
-			maxTimePeriodForCashDesk
-		);
+
+		minTimePeriodForCashDesk[index]++
+
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+		startEmulation(randomTimePeriod);
 	}
 
 	const clickMinusMinTimePeriodForCashDesk = (index) => {
-		
+		stopIntervals();
+
+		minTimePeriodForCashDesk[index]--
+
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+		startEmulation(randomTimePeriod);
 	}
 
+	const clickMinusMaxTimePeriodForCashDesk = (index) => {
+		stopIntervals();
+
+		maxTimePeriodForCashDesk[index]--
+
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+		startEmulation(randomTimePeriod);
+	}
+
+	const clickPlusMaxTimePeriodForCashDesk = (index) => {
+		stopIntervals();
+
+		maxTimePeriodForCashDesk[index]++
+
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+		startEmulation(randomTimePeriod);
+	}
+
+	let cashDeskElements = []
 
 	const startEmulation = (randomTimePeriod) => {
 		a = setInterval(() => {
@@ -208,8 +255,8 @@
 
 		for (let index = 0; index < cashDesksInfo.length; index++) {
 			let timePeriodForCashDesk = getRandomIntFromInterval(
-				minTimePeriodForCashDesk,
-				maxTimePeriodForCashDesk
+				minTimePeriodForCashDesk[index],
+				maxTimePeriodForCashDesk[index]
 			);
 			cashDesksInfo[index].time = timePeriodForCashDesk;
 
@@ -230,13 +277,25 @@
 					if (cashDesksInfo[index].numberOfPeopleAtOneCashDesk < 0) {
 						cashDesksInfo[index].numberOfPeopleAtOneCashDesk = 0;
 					}
-					cashDesksInfo[index].time = getRandomIntFromInterval(
-						minTimePeriodForCashDesk,
-						maxTimePeriodForCashDesk
-					);
+					// cashDesksInfo[index].time = getRandomIntFromInterval(
+					// 	minTimePeriodForCashDesk,
+					// 	maxTimePeriodForCashDesk
+					// );
 				}
 			}, cashDesksInfo[index].time * 1000))
 		}
+
+		setInterval(() => {
+			for (let index = 0; index < cashDesksInfo.length; index++) {
+				cashDeskElements[index].style.background = "black"
+			}
+
+			let minCashDeskIndex = getMinValueInArray(cashDesksInfo);
+			cashDeskElements[minCashDeskIndex].style.background = "green"
+
+			let maxCashDeskIndex = getMaxValueInArray(cashDesksInfo);
+			cashDeskElements[maxCashDeskIndex].style.background = "red"
+		}, 500)
 	};
 
 	const initEmulation = () => {
@@ -288,7 +347,7 @@
 		<button on:click={clickMinusNumberOfPeople}>-</button>
 		<button on:click={clickPlusNumberOfPeople}>+</button>
 
-		<label for="input-minTimePeriodForCashDesk"
+		<!-- <label for="input-minTimePeriodForCashDesk"
 			>Минимальное время обслуживания кассы:</label
 		>
 		<input
@@ -304,27 +363,29 @@
 			bind:value={maxTimePeriodForCashDesk}
 			id="input-maxTimePeriodForCashDesk"
 			type="number"
-		/>
+		/> -->
 
 		<button on:click={initEmulation}>Запустить процесс</button>
 		<button on:click={pause}>Пауза</button>
 
 		<div class="cashDesks">
 			{#each cashDesksInfo as cashDesk, index}
-				<div class="cashDesk">
+				<div class="cashDesk" bind:this={cashDeskElements[index]}>
 					<p>Время: {cashDesk.time}</p>
 					<p>Люди: {cashDesk.numberOfPeopleAtOneCashDesk}</p>
 					<p>Среднее: {Math.floor(cashDesk.avg * 100)/100}</p>
 					<input
-						bind:value={minTimePeriodForCashDesk}
+						bind:value={minTimePeriodForCashDesk[index]}
 						type="number"
 					/>
-					<button on:click={() => clickPlusMinTimePeriodForCashDesk(index)}>-</button>
-					<button on:click={() => clickMinusMinTimePeriodForCashDesk(index)}>+</button>
+					<button on:click={() => clickMinusMinTimePeriodForCashDesk(index)}>-</button>
+					<button on:click={() => clickPlusMinTimePeriodForCashDesk(index)}>+</button>
 					<input
-						bind:value={maxTimePeriodForCashDesk}
+						bind:value={maxTimePeriodForCashDesk[index]}
 						type="number"
 					/>
+					<button on:click={() => clickMinusMaxTimePeriodForCashDesk(index)}>-</button>
+					<button on:click={() => clickPlusMaxTimePeriodForCashDesk(index)}>+</button>
 				</div>
 			{/each}
 		</div>

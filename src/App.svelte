@@ -1,5 +1,6 @@
 <script>
 	import { afterUpdate } from "svelte";
+    import { check_outros } from "svelte/internal";
 
 	let numberOfCashDesk = 1;
 
@@ -54,24 +55,69 @@
 		isPaused = !isPaused;
 	};
 
+
+
+
+
+
+
+
+
+
+
+
 	let cashDesksInfo = [];
-	let isChangeData = false;
 	let a;
 	let b;
+	let arrayB = []
 
-	
+	const stopIntervals = () => {
+		clearInterval(a);
+		for (let index = 0; index < arrayB.length; index++) {
+			clearInterval(arrayB[index])
+			
+		}
+	};
 
-	const addNewCashDesk = (c) => {
-		isChangeData = true;
-		if (isChangeData == true) {
-			console.log("stopA");
-			clearInterval(a);
-		}
-		if (isChangeData == true) {
-			console.log("stopB");
-			clearInterval(b);
-		}
-		console.log("isChangeData : true");
+	// const addNewCashDesk = (c) => {
+	// 	stopIntervals();
+
+	// 	console.log("isChangeData : true");
+	// 	let timePeriodForCashDesk = getRandomIntFromInterval(
+	// 		minTimePeriodForCashDesk,
+	// 		maxTimePeriodForCashDesk
+	// 	);
+	// 	cashDesksInfo.push({
+	// 		time: timePeriodForCashDesk,
+	// 		numberOfPeopleAtOneCashDesk: 0,
+	// 		avg: 0,
+	// 		acceptPeople: [],
+	// 	});
+	// 	cashDesksInfo = cashDesksInfo;
+
+	// 	let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+	// 	startEmulation(randomTimePeriod);
+	// };
+
+	// $: if (numberOfCashDesk !== 1) {
+	// 	addNewCashDesk(numberOfCashDesk);
+	// }
+
+	const clickMinusNumberOfCashDesk = () => {
+		stopIntervals();
+		cashDesksInfo.pop()
+
+		cashDesksInfo = cashDesksInfo;
+		
+
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+
+		startEmulation(randomTimePeriod);
+	};
+
+	const clickPlusNumberOfCashDesk = () => {
+
+		stopIntervals();
 		let timePeriodForCashDesk = getRandomIntFromInterval(
 			minTimePeriodForCashDesk,
 			maxTimePeriodForCashDesk
@@ -82,15 +128,66 @@
 			avg: 0,
 			acceptPeople: [],
 		});
+		
 		cashDesksInfo = cashDesksInfo;
-		isChangeData = false;
+
 		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+
 		startEmulation(randomTimePeriod);
+
 	};
 
-	$: if (numberOfCashDesk !== 1) {
-		addNewCashDesk(numberOfCashDesk);
+
+
+	const clickMinusTimePeriod = () => {
+		stopIntervals();
+		timePeriod--
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+
+		startEmulation(randomTimePeriod);
 	}
+
+
+
+	const clickPlusTimePeriod = () => {
+		stopIntervals();
+		timePeriod++
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+
+		startEmulation(randomTimePeriod);
+	}
+
+
+	const clickMinusNumberOfPeople = () => {
+		stopIntervals();
+		numberOfPeople--
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+
+		startEmulation(randomTimePeriod);
+	}
+
+	const clickPlusNumberOfPeople = () => {
+		stopIntervals();
+		numberOfPeople++
+		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
+
+		startEmulation(randomTimePeriod);
+	}
+
+
+
+	const clickPlusMinTimePeriodForCashDesk = (index) => {
+		stopIntervals();
+		let timePeriodForCashDesk = getRandomIntFromInterval(
+			minTimePeriodForCashDesk,
+			maxTimePeriodForCashDesk
+		);
+	}
+
+	const clickMinusMinTimePeriodForCashDesk = (index) => {
+		
+	}
+
 
 	const startEmulation = (randomTimePeriod) => {
 		a = setInterval(() => {
@@ -107,6 +204,8 @@
 			}
 		}, randomTimePeriod * 1000);
 
+
+
 		for (let index = 0; index < cashDesksInfo.length; index++) {
 			let timePeriodForCashDesk = getRandomIntFromInterval(
 				minTimePeriodForCashDesk,
@@ -114,7 +213,7 @@
 			);
 			cashDesksInfo[index].time = timePeriodForCashDesk;
 
-			b = setInterval(() => {
+			arrayB.push(setInterval(() => {
 				console.log(cashDesksInfo[index].time);
 				if (!isPaused) {
 					cashDesksInfo[index].numberOfPeopleAtOneCashDesk--;
@@ -136,7 +235,7 @@
 						maxTimePeriodForCashDesk
 					);
 				}
-			}, cashDesksInfo[index].time * 1000);
+			}, cashDesksInfo[index].time * 1000))
 		}
 	};
 
@@ -150,7 +249,7 @@
 				time: 0,
 				numberOfPeopleAtOneCashDesk: 0,
 				avg: 0,
-				acceptPeople: [],
+				acceptPeople: []
 			});
 		}
 
@@ -158,6 +257,8 @@
 
 		startEmulation(randomTimePeriod);
 	};
+
+	
 </script>
 
 <main>
@@ -168,9 +269,14 @@
 			id="input-numberOfCashDesk"
 			type="number"
 		/>
+		<button on:click={clickMinusNumberOfCashDesk}>-</button>
+		<button on:click={clickPlusNumberOfCashDesk}>+</button>
 
 		<label for="input-timePeriod">Период времени в секундах:</label>
 		<input bind:value={timePeriod} id="input-timePeriod" type="number" />
+
+		<button on:click={clickMinusTimePeriod}>-</button>
+		<button on:click={clickPlusTimePeriod}>+</button>
 
 		<label for="input-numberOfPeople">Количество людей:</label>
 		<input
@@ -178,6 +284,9 @@
 			id="input-numberOfPeople"
 			type="number"
 		/>
+
+		<button on:click={clickMinusNumberOfPeople}>-</button>
+		<button on:click={clickPlusNumberOfPeople}>+</button>
 
 		<label for="input-minTimePeriodForCashDesk"
 			>Минимальное время обслуживания кассы:</label
@@ -201,11 +310,21 @@
 		<button on:click={pause}>Пауза</button>
 
 		<div class="cashDesks">
-			{#each cashDesksInfo as cashDesk}
+			{#each cashDesksInfo as cashDesk, index}
 				<div class="cashDesk">
 					<p>Время: {cashDesk.time}</p>
 					<p>Люди: {cashDesk.numberOfPeopleAtOneCashDesk}</p>
-					<p>Среднее: {cashDesk.avg}</p>
+					<p>Среднее: {Math.floor(cashDesk.avg * 100)/100}</p>
+					<input
+						bind:value={minTimePeriodForCashDesk}
+						type="number"
+					/>
+					<button on:click={() => clickPlusMinTimePeriodForCashDesk(index)}>-</button>
+					<button on:click={() => clickMinusMinTimePeriodForCashDesk(index)}>+</button>
+					<input
+						bind:value={maxTimePeriodForCashDesk}
+						type="number"
+					/>
 				</div>
 			{/each}
 		</div>
@@ -217,10 +336,15 @@
 		display: block;
 	}
 
+	.cashDesk input {
+		width: 80%;
+		margin: 0 auto;
+	}
+
 	.cashDesk {
 		display: inline-block;
 		width: 100px;
-		height: 200px;
+		height: 300px;
 		background: black;
 		margin-top: 50px;
 		margin-left: 10px;

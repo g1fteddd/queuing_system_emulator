@@ -56,13 +56,14 @@
 
 	let cashDesksInfo = []
 
+
 	const startEmulation = (randomTimePeriod) => {
 		
 		
 
 		setInterval(() => {
 			if (!isPaused) {
-				let randomNumberOfPeople = getRandomIntFromInterval(1, numberOfPeople) // вместо 1 поставить 0
+				let randomNumberOfPeople = getRandomIntFromInterval(0, numberOfPeople) // вместо 1 поставить 0
 				for (let index = 0; index < randomNumberOfPeople; index++) {
 					let minCashDeskIndex = getMinValueInArray(cashDesksInfo)
 					cashDesksInfo[minCashDeskIndex].numberOfPeopleAtOneCashDesk++
@@ -73,20 +74,24 @@
 
 		
 		for (let index = 0; index < cashDesksInfo.length; index++) {
-				let timePeriodForCashDesk = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
-				cashDesksInfo[index].time = timePeriodForCashDesk 
-				
-				setInterval(() => {
-					console.log(cashDesksInfo[index].time)
-					if (!isPaused) {
-						cashDesksInfo[index].numberOfPeopleAtOneCashDesk--
-						if (cashDesksInfo[index].numberOfPeopleAtOneCashDesk < 0) {
-							cashDesksInfo[index].numberOfPeopleAtOneCashDesk = 0
-						}
-						cashDesksInfo[index].time = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
+			let timePeriodForCashDesk = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
+			cashDesksInfo[index].time = timePeriodForCashDesk 
+			
+			setInterval(() => {
+				console.log(cashDesksInfo[index].time)
+				if (!isPaused) {
+					cashDesksInfo[index].numberOfPeopleAtOneCashDesk--
+					cashDesksInfo[index].acceptPeople.push(cashDesksInfo[index].time)
+					cashDesksInfo[index].avg = cashDesksInfo[index].acceptPeople.reduce((prevValue, currentValue) => {
+						return prevValue + currentValue
+					}, 0) / cashDesksInfo[index].acceptPeople.length
+					if (cashDesksInfo[index].numberOfPeopleAtOneCashDesk < 0) {
+						cashDesksInfo[index].numberOfPeopleAtOneCashDesk = 0
 					}
-				}, cashDesksInfo[index].time*1000)
-			}
+					cashDesksInfo[index].time = getRandomIntFromInterval(minTimePeriodForCashDesk, maxTimePeriodForCashDesk)
+				}
+			}, cashDesksInfo[index].time*1000)
+		}
 
 
 		
@@ -104,7 +109,9 @@
 		for (let index = 0; index < numberOfCashDesk; index++) {
 			cashDesksInfo.push({
 				time: 0,
-				numberOfPeopleAtOneCashDesk: 0
+				numberOfPeopleAtOneCashDesk: 0,
+				avg: 0,
+				acceptPeople: []
 			})
 			
 		}
@@ -117,6 +124,8 @@
 
 		
 	}
+
+
 
 
 	
@@ -148,8 +157,9 @@
 		<div class="cashDesks">
 			{#each cashDesksInfo as cashDesk}
 				<div class="cashDesk">
-					<p>{cashDesk.time}</p>
-					<p>{cashDesk.numberOfPeopleAtOneCashDesk}</p>
+					<p>Время: {cashDesk.time}</p>
+					<p>Люди: {cashDesk.numberOfPeopleAtOneCashDesk}</p>
+					<p>Среднее: {cashDesk.avg}</p>
 				</div>
 			{/each}
 		</div>
@@ -165,7 +175,7 @@
 
 	.cashDesk{
 		display: inline-block;
-		width: 50px;
+		width: 100px;
 		height: 200px;
 		background: black;
 		margin-top: 50px;

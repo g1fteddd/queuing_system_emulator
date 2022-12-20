@@ -24,15 +24,11 @@
 
 	let minTimePeriodForCashDesk = [5];
 
-	// $: if (minTimePeriodForCashDesk < 1) {
-	// 	minTimePeriodForCashDesk = 1;
-	// }
+	
 
 	let maxTimePeriodForCashDesk = [5];
 
-	// $: if (maxTimePeriodForCashDesk < 1) {
-	// 	maxTimePeriodForCashDesk = 1;
-	// }
+	
 
 	const getRandomIntFromInterval = (min, max) =>
 		Math.floor(Math.random() * (max - min + 1) + min);
@@ -95,29 +91,7 @@
 		}
 	};
 
-	// const addNewCashDesk = (c) => {
-	// 	stopIntervals();
 
-	// 	console.log("isChangeData : true");
-	// 	let timePeriodForCashDesk = getRandomIntFromInterval(
-	// 		minTimePeriodForCashDesk,
-	// 		maxTimePeriodForCashDesk
-	// 	);
-	// 	cashDesksInfo.push({
-	// 		time: timePeriodForCashDesk,
-	// 		numberOfPeopleAtOneCashDesk: 0,
-	// 		avg: 0,
-	// 		acceptPeople: [],
-	// 	});
-	// 	cashDesksInfo = cashDesksInfo;
-
-	// 	let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
-	// 	startEmulation(randomTimePeriod);
-	// };
-
-	// $: if (numberOfCashDesk !== 1) {
-	// 	addNewCashDesk(numberOfCashDesk);
-	// }
 
 	const clickMinusNumberOfCashDesk = () => {
 		stopIntervals();
@@ -128,6 +102,8 @@
 		cashDesksInfo = cashDesksInfo;
 		minTimePeriodForCashDesk = minTimePeriodForCashDesk
 		maxTimePeriodForCashDesk = maxTimePeriodForCashDesk
+
+		numberOfCashDesk--;
 		
 
 		let randomTimePeriod = getRandomIntFromInterval(1, timePeriod);
@@ -138,6 +114,7 @@
 	const clickPlusNumberOfCashDesk = () => {
 
 		stopIntervals();
+		numberOfCashDesk++;
 		minTimePeriodForCashDesk = [...minTimePeriodForCashDesk, 5]
 		maxTimePeriodForCashDesk = [...maxTimePeriodForCashDesk, 5]
 		let timePeriodForCashDesk = getRandomIntFromInterval(
@@ -234,15 +211,20 @@
 		startEmulation(randomTimePeriod);
 	}
 
+
+
+
+
+
 	let cashDeskElements = []
 
 	const startEmulation = (randomTimePeriod) => {
 		a = setInterval(() => {
 			if (!isPaused) {
 				let randomNumberOfPeople = getRandomIntFromInterval(
-					1,
+					0,
 					numberOfPeople
-				); // вместо 1 поставить 0
+				);
 				for (let index = 0; index < randomNumberOfPeople; index++) {
 					let minCashDeskIndex = getMinValueInArray(cashDesksInfo);
 					cashDesksInfo[minCashDeskIndex]
@@ -327,12 +309,13 @@
 			bind:value={numberOfCashDesk}
 			id="input-numberOfCashDesk"
 			type="number"
+			disabled
 		/>
 		<button on:click={clickMinusNumberOfCashDesk}>-</button>
 		<button on:click={clickPlusNumberOfCashDesk}>+</button>
 
 		<label for="input-timePeriod">Период времени в секундах:</label>
-		<input bind:value={timePeriod} id="input-timePeriod" type="number" />
+		<input bind:value={timePeriod} id="input-timePeriod" type="number" disabled />
 
 		<button on:click={clickMinusTimePeriod}>-</button>
 		<button on:click={clickPlusTimePeriod}>+</button>
@@ -342,28 +325,13 @@
 			bind:value={numberOfPeople}
 			id="input-numberOfPeople"
 			type="number"
+			disabled
 		/>
 
 		<button on:click={clickMinusNumberOfPeople}>-</button>
 		<button on:click={clickPlusNumberOfPeople}>+</button>
 
-		<!-- <label for="input-minTimePeriodForCashDesk"
-			>Минимальное время обслуживания кассы:</label
-		>
-		<input
-			bind:value={minTimePeriodForCashDesk}
-			id="input-minTimePeriodForCashDesk"
-			type="number"
-		/>
-
-		<label for="input-maxTimePeriodForCashDesk"
-			>Максимальное время обслуживания кассы:</label
-		>
-		<input
-			bind:value={maxTimePeriodForCashDesk}
-			id="input-maxTimePeriodForCashDesk"
-			type="number"
-		/> -->
+		
 
 		<button on:click={initEmulation}>Запустить процесс</button>
 		<button on:click={pause}>Пауза</button>
@@ -377,12 +345,14 @@
 					<input
 						bind:value={minTimePeriodForCashDesk[index]}
 						type="number"
+						disabled
 					/>
 					<button on:click={() => clickMinusMinTimePeriodForCashDesk(index)}>-</button>
 					<button on:click={() => clickPlusMinTimePeriodForCashDesk(index)}>+</button>
 					<input
 						bind:value={maxTimePeriodForCashDesk[index]}
 						type="number"
+						disabled
 					/>
 					<button on:click={() => clickMinusMaxTimePeriodForCashDesk(index)}>-</button>
 					<button on:click={() => clickPlusMaxTimePeriodForCashDesk(index)}>+</button>
